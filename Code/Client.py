@@ -2,7 +2,7 @@ import socket
 from threading import Thread
 
 
-class Client():
+class Client:
     def __init__(self):
         self.socket = socket.socket()
         self.socket.connect(('127.0.0.1', 542))

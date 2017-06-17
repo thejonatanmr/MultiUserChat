@@ -66,7 +66,7 @@ class ChatServer(socket.socket):
 
     # this function is called in a loop. waiting for client input and when input is found divides it to data fields
     def receive(self, client):
-        while client in self.clients:
+        while True:
             data = client.recv(1024)
             if data == '':
                 break
@@ -76,10 +76,10 @@ class ChatServer(socket.socket):
             if data_fields.message.lower() == "quit":
                 self.on_message(client, data_fields)
                 self.disconnect(self, client, data_fields)
-                thread.exit()
-                print self.clients
+                break
 
-            self.on_message(client, data_fields)
+            if not self.on_message(client, data_fields):
+                break
         thread.exit()
 
     # when a new message from a client is found this function is called to handle the message
@@ -87,9 +87,11 @@ class ChatServer(socket.socket):
         if self.check_name(client, data_fields):
             if data_fields.operation == "01":
                 self.broadcast(data_fields, client)
+            return True
         else:
             data_fields.message = "your name is unavailable please change it"
             self.disconnect(client, data_fields)
+            return False
 
     # this function broadcasts a message to all clients connected to the server except the sender
     def broadcast(self, data_fields, blacklisted_client):
